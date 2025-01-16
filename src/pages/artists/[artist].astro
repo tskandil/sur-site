@@ -1,0 +1,90 @@
+---
+import sanityClient from "../../sanity/sanity.client";
+import type { GetStaticPaths } from "astro";
+import Main from "../../layouts/Main.astro";
+import SanityImage from "../../components/SanityImage.astro";
+
+export const getStaticPaths = (async () => {
+	const artists = await sanityClient.fetch(`*[_type == "artist" && defined(slug.current)] {
+		...,
+		"artworks": *[_type == "artwork" && references(^._id)],
+	}`);
+	return artists?.map((artist) => {
+		return {
+			params: {
+				artist: artist.slug?.current,
+			},
+			props: {
+				...artist,
+			},
+		};
+	});
+}) satisfies GetStaticPaths;
+
+const artist = Astro.props;
+---
+
+<Main title=`Sur - ${artist.name}`>
+	<div class="artistCard">
+		<h1 class="artistName">{artist.name}</h1>
+		<h2 class="label">{artist.country}</h2>
+		<p class="artistBio">{artist.longBio}</p>
+	</div>
+	{artist.artworks.map(artwork => (
+		<div class="artworkCard">
+			<SanityImage node={artwork.image} />
+			<p class="label">{artwork.title}</p>
+			<p class="label">{artwork.medium.join(" / ")}</p>
+			<p class="caption">{artwork.description}</p>
+		</div>
+	))}
+</Main>
+
+<style lang="scss">
+	@use "../../styles/mixins.scss";
+
+	.artistCard {
+		display:flex;
+		flex-direction: column;
+		padding-block: var(--gap-large);
+		@include mixins.fullWidth($background:var(--petrol), $color:var(--white));
+		margin-bottom: var(--gap-large);
+	}
+	.artworkCard {
+		display:flex;
+		flex-direction: column;
+		gap: var(--gap-small);
+		align-items: center;
+		margin-bottom: var(--gap-large);
+		:global(img) {
+			display: block;
+			width: 100%;
+			height: 100%;
+			max-height: 80vh;
+			object-fit: contain;
+		}
+	}
+
+	.artistName {
+		@include mixins.tertiaryHeading;
+		margin-bottom: var(--gap-small);
+	}
+
+	.artistBio {
+		@include mixins.bodyText;
+		margin-bottom: var(--gap-small);
+
+	}
+
+	.caption {
+		font-size: .7rem;
+		font-style: italic;
+		font-weight: 200;
+	}
+	.label {
+		@include mixins.label;
+		margin-bottom: var(--gap-small);
+	}
+
+
+</style>

@@ -1,0 +1,107 @@
+---
+import SanityImage from "../../components/SanityImage.astro";
+import Main from "../../layouts/Main.astro";
+import sanityClient from "../../sanity/sanity.client";
+
+const site = await sanityClient.fetch(`*[_type == "site"][0]{
+	exhibitionMessage,
+}`);
+
+const exhibitions = await sanityClient.fetch(`*[_type == "exhibition"] {
+    title,
+    heroImage,
+    briefDesc,
+    slug,
+}`);
+---
+
+<Main title="Sur - Exhibitions">
+   
+       
+    <div class="titleBox">
+        <h1 class="title">Exhibitions</h1>
+        <p class="titleText">{site.exhibitionMessage}</p>
+    </div>
+            <div class="exhibitionGrid breakout">
+                {exhibitions.map((exhibition) => (
+                    <article class="exhibitionItem">
+                            <div class="exhibitionImage">
+                                <SanityImage node={exhibition.heroImage} />
+                            </div>
+                            <h1 class="exhibitionTitle">
+                                <a href={`/exhibitions/${exhibition.slug.current}`}>
+                                    {exhibition.title}
+                                </a>
+                            </h1>
+                            <p class="exhibitionBriefDesc">
+                                {exhibition.briefDesc}
+                            </p>
+                    </article>
+                ))}
+            </div>
+
+        
+    
+</Main>
+
+<style lang="scss">
+    @use "../../styles/mixins.scss";
+
+
+    .titleBox {
+		@include mixins.fullWidth;
+
+        @media (max-width: 512px) {
+		text-align: center;
+    }
+
+	}
+
+	.title {
+		@include mixins.primaryHeading;
+        margin-bottom: var(--gap-large);
+
+	}
+
+	.titleText {
+		@include mixins.largeBodyText;
+	}
+
+    .exhibitionGrid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--gap-medium);
+    }
+
+    .exhibitionItem {
+        @include mixins.link($isHoverable: true);
+        flex: 0 0 calc((100% - ((var(--columns) - 1) * var(--gap-medium))) / var(--columns));
+        display:flex;
+        align-items: center;
+        flex-direction: column;
+        gap: var(--gap-small);
+        position: relative;
+    }
+    
+    .exhibitionImage :global(img) {
+        width: 100%;
+        // aspect-ratio: 1 / 1;
+        object-fit: cover;
+    }
+
+    .exhibitionTitle {
+        @include mixins.tertiaryHeading;
+		a::after {
+			content: "";
+			position: absolute;
+			inset: 0;
+			z-index: 2;
+		}
+    }
+
+    .exhibitionBriefDesc {
+        @include mixins.bodyText;
+        max-width: 80%;
+        margin-inline: auto;
+    }
+</style>

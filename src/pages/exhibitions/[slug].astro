@@ -1,0 +1,45 @@
+---
+import sanityClient from "../../sanity/sanity.client";
+import type { GetStaticPaths } from "astro";
+import Main from "../../layouts/Main.astro";
+import SanityImage from "../../components/SanityImage.astro";
+
+export const getStaticPaths = (async () => {
+	const exhibitions = await sanityClient.fetch(`*[_type == "exhibition" && defined(slug.current)]{
+		...,
+		artists[]->,
+	}`);
+	return exhibitions?.map((exhibition) => {
+		return {
+			params: {
+				slug: exhibition.slug?.current,
+			},
+			props: {
+				...exhibition,
+			},
+		};
+	});
+}) satisfies GetStaticPaths;
+
+const exhibition = Astro.props;
+---
+
+<Main title=`Sur - ${exhibition.title}` description={exhibition.briefDesc}>
+	<div class="exhibitionCard">
+		<h1 class="exhibitionName">{exhibition.title}</h1>
+		<h2 class="label">{exhibition.startDate}</h2>
+		<h2 class="label">{exhibition.endDate}</h2>
+		<p class="artistBio">{exhibition.longDesc}</p>
+		<SanityImage node={exhibition.heroImage} />
+	</div>
+	<div class="exhibitionArtist">
+		{exhibition.artists.map(artist => (
+			<p class="label">{artist.name}</p>
+			<p class="label">{artist.country}</p>
+			<p class="label">{artist.shortBio}</p>
+		))}
+	</div>
+</Main>
+
+<style lang="scss">
+</style>

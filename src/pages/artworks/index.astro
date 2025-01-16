@@ -1,0 +1,48 @@
+---
+import SanityImage from "../../components/SanityImage.astro";
+import Main from "../../layouts/Main.astro";
+import sanityClient from "../../sanity/sanity.client";
+
+
+// const site = await sanityClient.fetch(`*[_type == "site"][0]{
+// 	artistMessage,
+// }`);
+
+const artworks = await sanityClient.fetch(`*[_type == "artwork" && defined(slug.current)] {
+    ...,
+    artists[]->,
+}`);
+
+---
+
+<Main title="Sur - Artworks">
+  <!-- title
+   grid of the artwork
+ -->
+ <div class="titleBox">
+    <h1 class="title">Artworks</h1>
+<div class="artworksGrid breakout">
+
+    {artworks && artworks.length !== 0 && artworks.map((artwork) => {
+        // any logic here
+        return (
+            <div>
+                <a href={`/artworks/${artwork.slug.current}`}>
+                    <SanityImage node={artwork.image}/>
+                    <h1>{artwork.title}</h1>
+                    <p>{artwork.artists && artwork.artists.length !== 0 && artwork.artists.map((artist) => artist.name).join(", ")}</p>
+                </a>
+            </div>
+        );   
+    })}
+</div>
+
+</div>
+</Main>
+
+<style lang="scss">
+    @use "../../styles/mixins.scss";
+
+
+ 
+</style>

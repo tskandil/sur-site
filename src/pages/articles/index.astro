@@ -1,0 +1,31 @@
+---
+import Main from "../../layouts/Main.astro";
+import { capitaliseFirstLetter } from "../../lib/util";
+import sanityClient from "../../sanity/sanity.client";
+
+const articles = await sanityClient.fetch(`*[_type == "article" && defined(slug.current)]`);
+
+---
+
+<Main title=`Sur - Articles`>
+    <h1>Title of this page</h1>
+    {articles && articles.length !== 0 && articles.map((article) => {
+        const isoDate = new Date(article._createdAt);
+        const formattedDate = isoDate.toLocaleString('default', {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+        });
+        return (
+            <div>
+                <a href={`/articles/${article.slug.current}`}>
+                    <h2>{capitaliseFirstLetter(article.category)}: {article.title}</h2>
+                    <p>{article.author}</p>
+                    <p>{article.description}</p>
+                    <p>{formattedDate}</p>
+                </a>
+            </div>
+        );
+    })}
+    <!-- end of mapping -->
+</Main>

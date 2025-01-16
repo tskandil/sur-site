@@ -1,0 +1,57 @@
+---
+import type { GetStaticPaths } from "astro";
+import Main from "../../layouts/Main.astro";
+import sanityClient from "../../sanity/sanity.client";
+import RichText from "../../components/RichText.astro";
+
+export const getStaticPaths = (async () => {
+	const articles = await sanityClient.fetch(`*[_type == "article" && defined(slug.current)]`);
+	return articles?.map((article) => {
+		return {
+			params: {
+				article: article.slug?.current,
+			},
+			props: {
+				...article,
+			},
+		};
+	});
+}) satisfies GetStaticPaths;
+
+const article = Astro.props;
+---
+
+<Main title=`Sur - ${article.title}`>
+    <!-- title category author createdat body -->
+     <hi>{article.title}</hi>
+     <p>{article.category}</p>
+     <p>{article.author}</p>
+     <p>{article._createdAt}</p>
+     <div class="articleBody">
+         <RichText node={article.body} />
+     </div>
+</Main>
+
+<style lang="scss">
+    .articleBody {
+        :global(p) {}
+        :global(h3) {
+            font-size: 2em; // for example
+        }
+        :global(strong) {
+            font-weight: bolder;
+        }
+        :global(em) {
+            font-style: italic;
+        }
+        :global(ul) {
+            // probably spacing
+        }
+        :global(ol) {
+            // probably spacing
+        }
+        :global(a) {
+            text-decoration: underline;
+        }
+    }
+</style>

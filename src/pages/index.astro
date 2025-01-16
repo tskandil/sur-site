@@ -1,16 +1,363 @@
 ---
+import SanityImage from "../components/SanityImage.astro";
+import Main from "../layouts/Main.astro";
+import { capitaliseFirstLetter, onlyUnique } from "../lib/util";
+import sanityClient from "../sanity/sanity.client";
 
+const site = await sanityClient.fetch(`*[_type == "site"][0]{
+	...,
+	featuredArtists[]->{
+		...,
+		"artworks": *[ _type == "artwork" && references(^._id) ],
+	},
+	featuredExhibitions[]->{
+		...,
+		artists[]->,
+	}
+}`);
+const reviews = await sanityClient.fetch(`*[_type == "review"]`);
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+
+
+
+<Main title="Sur Home">
+	<div class="welcomeBackground">
+		{site.featuredArtists?.map(featuredArtist => featuredArtist.artworks.map(artwork => (
+				<SanityImage node={artwork.image}/>
+			))
+		)}
+	</div>
+	<div class="welcomeMessage">
+		<h1 class="title">Welcome</h1>
+		<p class="titleText">{site.welcomeMessage}</p>
+	</div>
+
+
+
+
+	{site.featuredArtists && site.featuredArtists.length !== 0 && (
+			<div class="titleBox">
+				<h2 class="title">Featured Artists</h2>
+				<p class="titleText">{site.artistMessage}</p>
+			</div>
+			<div class="carouselWrapperArtists breakout">
+				{site.featuredArtists.map(featuredArtist => {
+					let allMedia = [];
+					featuredArtist.artworks.map(artwork => artwork.medium.map(singleMedium => allMedia.push(singleMedium)));
+					return (
+						<article class="featuredArtistCard">
+							<div class="featuredArtistInfo">
+								<h3 class="featuredArtistName">
+									<a href={`/artists/${featuredArtist.slug.current}`}>
+										{featuredArtist.name}
+									</a>
+								</h3>
+								<p class="label">{
+									onlyUnique(allMedia).map(medium => capitaliseFirstLetter(medium)
+									).join( " / " )
+								}</p>
+								<p class="label">{featuredArtist.country}</p>
+								{/* <p class="featuredArtistBio">{featuredArtist.shortBio}</p> */}
+								<a href={`/artists/${featuredArtist.slug.current}`} class="clickHere">
+									<p class="clickHereText">Learn More</p>
+								</a>
+							</div>
+							<div class="featuredArtistImage">
+								<SanityImage node={featuredArtist.artworks[0].image}/>
+							</div>
+						</article>
+					)
+				})}	
+			</div>
+			<div class="scrollerWrapper">
+				<button name="artistScrollButton" value="prev" class="scrollButtonPrev">
+					Prev
+				</button>
+				<button name="artistScrollButton" value="next" class="scrollButtonNext">
+					Next
+				</button>
+			</div>
+	)}
+
+			<script>
+				const artistScrollButtons = document.querySelectorAll("button[name='artistScrollButton']");
+				artistScrollButtons.forEach(button => button.addEventListener("click", () => handleClick(button)));
+				function handleClick(element) {
+					const value=element.getAttribute("value");
+					const target=document.querySelector(".carouselWrapperArtists");
+
+					if(value==="next") {
+						if (target?.scrollLeft === target?.scrollWidth - (target?.querySelector("article")?.getBoundingClientRect().width + parseInt(window.getComputedStyle(target).gap))) {
+							console.log("blaaargh")
+						} else {
+							target.scrollLeft += target?.querySelector("article")?.getBoundingClientRect().width + parseInt(window.getComputedStyle(target).gap);
+						}
+					} else if (value==="prev") {
+						if (target?.scrollLeft === 0) {
+							target.scrollLeft = target.scrollWidth
+						} else {
+							target.scrollLeft -= target?.querySelector("article")?.getBoundingClientRect().width + parseInt(window.getComputedStyle(target).gap);;
+						}
+					}
+				}
+			</script>
+
+
+
+	{site.featuredExhibitions && site.featuredExhibitions.length !== 0 && (
+				<div class="titleBox">
+					<h2 class="title">Featured Exhibitions</h2>
+					<p class="titleText">{site.exhibitionMessage}</p>
+				</div>
+				<div class="carouselWrapperExhibitions">
+					{site.featuredExhibitions.map(featuredExhibition => (
+						<article class="featuredExhibitionCard">
+							<div class="featuredExhibitionImage">
+								<SanityImage node={featuredExhibition.heroImage}/>
+							</div>
+							<h3 class="featuredExhibitionTitle">
+								<a href={`/exhibitions/${featuredExhibition.slug.current}`}>
+										{featuredExhibition.title}
+								</a>
+							</h3>
+						</article>
+					))}	
+				</div>
+	)}
+</Main>
+
+
+
+
+<style lang="scss">
+	@use "../styles/mixins.scss";
+
+// start with more general styles
+// move to more specific styles
+// media queries sorted
+
+
+	.welcomeBackground {
+		grid-column: 1/6;
+		position: relative;
+		height: 80vh;
+	}
+
+	.welcomeBackground :global(img) {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	.welcomeBackground::after {
+		content: "";
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		background: var(--black);
+		opacity: 0.75;
+	}
+
+	.welcomeMessage {
+		position: absolute;
+		padding-inline: calc(var(--gap-small) + var(--lanes));
+		top:50%;
+		transform: translateY(-50%);
+		color: white;
+
+		@media (max-width: 512px) {
+		text-align: center;
+    	}
+	}
+
+	.titleBox {
+		@include mixins.fullWidth;
+
+		@media (max-width: 512px) {
+		text-align: center;
+    	}
+	}
+
+	.title {
+		@include mixins.primaryHeading;
+		margin-bottom: var(--gap-large);
+
+	}
+
+	.titleText {
+		@include mixins.largeBodyText;
+	}
+
+	.label {
+		@include mixins.label;
+		margin-bottom: var(--gap-small);
+	}
+
+	.carouselWrapperArtists {
+		display:flex;
+		justify-content: flex-start;
+		width: 100%;
+		overflow-x: auto;
+		scroll-snap-type: x mandatory;
+		scroll-snap-stop: always;
+		scroll-behavior: smooth;
+		gap: var(--gap-small);
+	}
+
+	.scrollerWrapper {
+		display: flex;
+		width: 100%;
+		margin-top: var(--gap-medium);
+	}
+
+	button {
+		padding: var(--gap-small);
+		@include mixins.label;
+		background-color: white;
+		border-width: 1px;
+	}
+
+	.scrollButtonNext {
+		margin-left: auto;
+	}
+
+
+
+	.featuredArtistCard {
+		position: relative;
+		flex: 0 0 100%;
+		scroll-snap-align: center;
+		background: var(--gray);
+		display: flex;
+		// padding: 1rem;
+		column-gap: var(--gap-small);
+		z-index: 1;
+		color: var(--black);
+	}
+	
+	.featuredArtistInfo {
+		display: flex;
+		flex-direction: column;
+		padding: var(--lanes);
+		flex: 1;
+		align-items: left;
+		justify-content: center;
+	}
+	
+	.clickHere {
+		border: 1px solid black;
+		display:flex;
+		
+		padding-block: var(--gap-small);
+	
+		@include mixins.label;
+	}
+
+	.clickHereText {
+		margin-inline: auto;
+	}
+
+	.featuredArtistName {
+		@include mixins.tertiaryHeading;
+		margin-bottom: var(--gap-small);
+		a::after {
+			content: "";
+			position: absolute;
+			inset: 0;
+			z-index: 2;
+		}
+		@media (max-width: 512px) {
+			margin-top: var(--gap-small);
+		}	
+	}
+
+	.featuredArtistName a {
+		
+	}
+	
+	.featuredArtistImage {
+		flex: 2;
+		:global(img) {
+			display: block;
+			width: 100%;
+			height: 100%;
+			height: 60vh;
+			object-fit: cover;
+		}
+	}
+
+	/** the following rules are for switching the cards to a column layout */
+	.featuredArtistCard {
+		@media (max-width: 768px) {
+			& {
+				flex-direction: column-reverse;
+				align-items: center;
+				text-align: center;
+			}
+			.featuredArtistImage {
+				width: 100%;
+				:global(img) {
+					height: 45vh;
+				}
+			}
+		}
+	}
+
+	.featuredArtistBio {
+		@include mixins.bodyText;
+		margin-top: auto;
+	}
+	
+	.carouselWrapperExhibitions {
+		grid-column: 1/6;
+		display:flex;
+		justify-content: flex-start;
+		width: 100%;
+		overflow-x: auto;
+		scroll-snap-type: x mandatory;
+		scroll-snap-stop: always;
+		scroll-behavior: smooth;
+		gap: var(--gap-small);
+		background: var(--gray);
+		color: var(--black);
+		
+	}
+
+	.featuredExhibitionCard {
+		position: relative;
+		flex: 0 0 30%;
+		scroll-snap-align: center;
+		
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		padding: var(--gap-large);
+		gap: var(--gap-x);
+		z-index: 1;
+
+		@media (max-width: 512px) {
+        flex-direction: column-reverse;
+		flex: 0 0 100%;
+    }
+	}
+
+	.featuredExhibitionImage {
+		
+	}
+
+	.featuredExhibitionTitle {
+		@include mixins.tertiaryHeading;
+		a::after {
+			content: "";
+			position: absolute;
+			inset: 0;
+			z-index: 2;
+		}
+		margin-top: var(--gap-large);
+	}
+
+</style>

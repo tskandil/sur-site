@@ -1,0 +1,138 @@
+---
+import SanityImage from "../../components/SanityImage.astro";
+import Main from "../../layouts/Main.astro";
+import { onlyUnique, capitaliseFirstLetter } from "../../lib/util";
+import sanityClient from "../../sanity/sanity.client";
+
+
+const site = await sanityClient.fetch(`*[_type == "site"][0]{
+	artistMessage,
+}`);
+
+const artists = await sanityClient.fetch(`*[_type == "artist"] {
+    ...,
+    "artworks": *[ _type == "artwork" && references(^._id) ],
+}`);
+
+---
+
+<Main title="Sur - Artists">
+  
+            <div class="titleBox">
+                <h1 class="title">Artists</h1>
+                <p class="titleText">{site.artistMessage}</p>
+            </div>
+            <div class="artistsGrid breakout">
+                {artists && artists.length !== 0 && artists.map((artist) => {
+                    let allMedia = [];
+                    artist.artworks?.map(artwork => artwork.medium.map((singleMedium) => allMedia.push(singleMedium)));
+                    return (
+                            <article class="artistItem">
+                                <a href={`/artists/${artist.slug.current}`}>
+                                    <div class="artistImage">
+                                        <SanityImage node={artist.artworks[0].image} />
+                                    </div>
+                                    <div class="artistInfo">
+                                        <h1 class="artistName">
+                                            {artist.name}
+                                        </h1>
+                                        <p class="label">
+                                            {artist.country}
+                                        </p>
+                                        <p class="label">
+                                            {onlyUnique(allMedia).map((medium) => capitaliseFirstLetter(medium)).join(", ")}
+                                        </p>
+                                        <p class="artistBio">
+                                            {artist.shortBio}
+                                        </p>
+                                        {/* <p class="label">
+                                            {artist.artworks[0].title}
+                                        </p> */}
+                                    </div>
+                                </a>
+                            </article>
+                    )
+                }) || (
+                    <div>
+                        No artists
+                    </div>
+                )}
+            </div>
+            
+       
+   
+</Main>
+
+<style lang="scss">
+    @use "../../styles/mixins.scss";
+
+
+    .titleBox {
+		@include mixins.fullWidth;
+
+        @media (max-width: 512px) {
+		text-align: center;
+    }
+
+	}
+
+	.title {
+		@include mixins.primaryHeading;
+        margin-bottom: var(--gap-large);
+
+	}
+
+	.titleText {
+		@include mixins.largeBodyText;
+	}
+
+    .artistsGrid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--gap-medium);
+        margin-bottom: var(--gap-large);
+    }
+
+    .artistItem {
+        @include mixins.link($isHoverable: true);
+        flex: 0 0 calc((100% - ((var(--columns) - 1) * var(--gap-medium))) / var(--columns));
+    }
+
+    .artistItem a {
+        display:flex;
+        align-items: center;
+        height:100%;
+        flex-direction: column;
+        gap: var(--gap-small);
+    }
+
+
+    .artistInfo {
+       
+        text-align: center;
+        
+    }
+
+    .artistName {
+        @include mixins.tertiaryHeading;
+        margin-bottom: var(--gap-small);
+    }
+
+    .label {
+        @include mixins.label;
+        margin-bottom: var(--gap-small);
+    }
+
+    .artistBio {
+        @include mixins.bodyText;
+        max-width: 80%;
+        margin-inline: auto;
+        margin-top: -.3rem;
+    }
+
+    .artistImage :global(img) {
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        object-fit: cover;
+    }
+</style>

@@ -1,0 +1,99 @@
+@mixin primaryHeading($lh: 1) {
+    font-family: "Cardo";
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: $lh;
+    @media (max-width: 1024px) {
+        font-size: 2rem;
+    }
+    @media (max-width: 768px) {
+        font-size: 1.5rem;
+    }
+    @media (max-width: 512px) {
+        font-size: 1.25rem;
+    }
+}
+
+@mixin tertiaryHeading($lh: 1) {
+    font-family: "Cardo";
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: $lh;
+    @media (max-width: 1024px) {
+        font-size: 1.25rem;
+    }
+    // @media (max-width: 768px) {
+    //     font-size: 1rem;
+    // }
+    // @media (max-width: 512px) {
+    //     font-size: 1rem;
+    // }
+}
+
+@mixin largeBodyText($lh: 1.3) {
+    font-family: "josefin slab";
+    font-size: 1.25rem;
+    font-weight: 300;
+    line-height: $lh;
+    letter-spacing: .05rem;
+    @media (max-width: 768px) {
+        font-size: 1rem;
+    }
+    @media (max-width: 512px) {
+        font-size: 1rem;
+    }
+}
+
+@mixin bodyText($lh: 1.3) {
+    font-family: "josefin slab";
+    font-size: 1rem;
+    font-weight: 200;
+    line-height: $lh;
+    letter-spacing: .05rem;
+    // @media (max-width: 1024px) {
+    //     font-size: 1rem;
+    // }
+    // @media (max-width: 768px) {
+    //     font-size: .7rem;
+    // }
+    // @media (max-width: 512px) {
+    //     font-size: .5rem;
+    // }
+}
+
+@mixin label {
+    font-family: "josefin slab";
+    font-size: .75rem;
+    font-weight: 300;
+    text-transform: uppercase;
+    letter-spacing: .25rem;
+    // @media (max-width: 1024px) {
+    //     font-size: .7rem;
+    // }
+    // @media (max-width: 768px) {
+    //     font-size: .6rem;
+    // }
+    // @media (max-width: 512px) {
+    //     font-size: .5rem;
+    // }
+}
+
+@mixin link($isHoverable: true) {
+    @if $isHoverable == true {
+        @media (any-hover: hover) {
+            transition: transform 0.25s ease-in-out;
+            &:hover {
+                transform: scale(102%);
+            }
+        }
+    }
+}
+
+@mixin fullWidth($background: transparent, $color: currentColor, $padding-block: 6rem, $margin-bottom: var(--gap-small)) {
+    grid-column: 1/6;
+    padding-inline: calc(var(--gap-small) + var(--lanes));
+    background: $background;
+    color: $color;
+    padding-block: $padding-block;
+    margin-bottom: $margin-bottom;
+}

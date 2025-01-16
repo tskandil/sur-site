@@ -1,0 +1,51 @@
+---
+import sanityClient from "../../sanity/sanity.client";
+import type { GetStaticPaths } from "astro";
+import Main from "../../layouts/Main.astro";
+import SanityImage from "../../components/SanityImage.astro";
+import { capitaliseFirstLetter } from "../../lib/util";
+
+export const getStaticPaths = (async () => {
+	const artworks = await sanityClient.fetch(`*[_type == "artwork" && defined(slug.current)] {
+		...,
+		artists[]->,
+	}`);
+	return artworks?.map((artwork) => {
+		return {
+			params: {
+				artwork: artwork.slug?.current,
+			},
+			props: {
+				...artwork,
+			},
+		};
+	});
+}) satisfies GetStaticPaths;
+
+const artwork = Astro.props;
+---
+
+<Main title=`Sur - ${artwork.title}`>
+	<!-- title image artists description media year button -->
+	 <h1>{artwork.title}</h1>
+	 <p>{artwork.year}</p>
+	 <SanityImage node={artwork.image}/>
+	 <p>{artwork.medium && artwork.medium.length !== 0 && artwork.medium.map((singleMedium) => capitaliseFirstLetter(singleMedium)).join(", ")}</p>
+	 <p>{artwork.description}</p>
+	 {artwork.artists && artwork.artists.length !== 0 && artwork.artists.map((artist) => {
+		 // logic
+		return (
+			<div>
+				<p>{artist.name}</p>
+				<p>{artist.country}</p>
+				<p>{artist.shortBio}</p>
+			</div>
+		);
+	})}
+	<a href={`mailto:info@sur.art?subject=Inquiry for ${artwork.title}&body=I would like to inquire about the artwork at https://sur.art/artworks/${artwork.slug.current}`}>Inquire</a>
+</Main>
+
+<style lang="scss">
+	@use "../../styles/mixins.scss";
+
+</style>
