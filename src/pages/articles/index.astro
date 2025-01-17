@@ -9,24 +9,74 @@ const articles = await sanityClient.fetch(`*[_type == "article" && defined(slug.
 ---
 
 <Main title=`Sur - Articles`>
-    <h1>Title of this page</h1>
-    {articles && articles.length !== 0 && articles.map((article) => {
-        const isoDate = new Date(article._createdAt);
-        const formattedDate = isoDate.toLocaleString('default', {
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-        });
-        return (
-            <div>
-                <a href={`/articles/${article.slug.current}`}>
-                    <h2>{capitaliseFirstLetter(article.category)}: {article.title}</h2>
-                    <p>{article.author}</p>
-                    <p>{article.description}</p>
-                    <p>{formattedDate}</p>
-                </a>
-            </div>
-        );
-    })}
-    <!-- end of mapping -->
+    <div class="titleBox">
+        <h1 class="pageTitle">Bulletin</h1>
+    </div>
+    <div class="articlesList">
+        {articles && articles.length !== 0 && articles.map((article) => {
+            const isoDate = new Date(article._createdAt);
+            const formattedDate = isoDate.toLocaleString('default', {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+            });
+            return (
+                <div class="article">
+                    <a href={`/articles/${article.slug.current}`}>
+                        <h2 class="articleTitle">{capitaliseFirstLetter(article.category)}: {article.title}</h2>
+                        <p class="articleLabel">{article.author} - {formattedDate}</p>
+                        <p class="articleSnippet">{article.description}</p>
+                        <p class="articleMore">Read More →</p>
+                    </a>
+                </div>
+            );
+        })}
+    </div>
 </Main>
+
+<style lang="scss">
+    @use "../../styles/mixins.scss";
+
+    .titleBox {
+		// @include mixins.fullWidth;
+        @include mixins.fullWidth($background:var(--petrol), $color:var(--white));
+        @media (max-width: 512px) {
+		    text-align: center;
+        }
+	}
+
+    .pageTitle {
+        @include mixins.primaryHeading;
+    }
+
+    .articlesList {
+        display: flex;
+        flex-direction: column;
+        gap: var(--gap-small);
+    }
+
+    .article {
+        
+    }
+
+    .articleTitle {
+        @include mixins.tertiaryHeading;
+        margin-bottom: var(--gap-small);
+    }
+
+    .articleLabel {
+        @include mixins.label;
+        margin-bottom: var(--gap-small);
+    }
+
+    .articleSnippet {
+        @include mixins.bodyText;
+        margin-bottom: var(--gap-small);
+    }
+
+    .articleMore {
+        @include mixins.label;
+        margin-bottom: var(--gap-small);
+    }
+
+</style>

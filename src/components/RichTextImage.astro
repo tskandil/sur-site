@@ -1,0 +1,23 @@
+---
+import SanityImage from "./SanityImage.astro";
+
+const node = Astro.props.node;
+---
+
+<div class="image">
+    <SanityImage node={node} />
+    {node.caption && node.caption.length !== 0 && (
+        <p>{node.caption}</p>
+    )}
+</div>
+
+<style lang="scss">
+    :global(img) {
+        width: 100%;
+        height: auto;
+    }
+    p {
+        margin-top: calc(var(--gap-small) / 2);
+        font-style: italic;
+    }
+</style>

@@ -4,6 +4,7 @@ import type { GetStaticPaths } from "astro";
 import Main from "../../layouts/Main.astro";
 import sanityClient from "../../sanity/sanity.client";
 import RichText from "../../components/RichText.astro";
+import { capitaliseFirstLetter } from "../../lib/util";
 
 export const getStaticPaths = (async () => {
 	const articles = await sanityClient.fetch(`*[_type == "article" && defined(slug.current)]`);
@@ -23,36 +24,67 @@ const article = Astro.props;
 ---
 
 <Main title=`Sur - ${article.title}`>
-    <!-- title category author createdat body -->
-     <hi>{article.title}</hi>
-     <p>{article.category}</p>
-     <p>{article.author}</p>
-     <p>{article._createdAt}</p>
+    <div class="titleBox">
+        <h1 class="articleTitle">{article.title}</h1>
+        <p class="articleLabel">{capitaliseFirstLetter(article.category)}</p>
+        <p class="articleAuthor">{article.author}</p>
+        
+    </div>
      <div class="articleBody">
          <RichText node={article.body} />
      </div>
 </Main>
 
 <style lang="scss">
+    @use "../../styles/mixins.scss";
+    .titleBox {
+		// @include mixins.fullWidth;
+        @include mixins.fullWidth($background:var(--petrol), $color:var(--white));
+        @media (max-width: 512px) {
+		    text-align: center;
+        }
+	}
+
+    .articleTitle {
+        @include mixins.primaryHeading;
+        margin-bottom: var(--gap-small);
+    }
+
+    .articleLabel {
+        @include mixins.label;
+        margin-bottom: var(--gap-large);
+    }
+
+    .articleAuthor {
+        @include mixins.bodyText;
+    }
+
     .articleBody {
-        :global(p) {}
+        & {
+            display: flex;
+            flex-direction: column;
+            gap: var(--gap-small);
+        }
+        :global(*:not(h3)) {
+            @include mixins.bodyText;
+        }
         :global(h3) {
-            font-size: 2em; // for example
+            @include mixins.tertiaryHeading;
         }
         :global(strong) {
-            font-weight: bolder;
+            font-weight: 700;
         }
         :global(em) {
             font-style: italic;
         }
-        :global(ul) {
-            // probably spacing
-        }
-        :global(ol) {
-            // probably spacing
+        :global(ul, ol) {
+            padding-inline-start: var(--gap-large);
         }
         :global(a) {
             text-decoration: underline;
+        }
+        :global(.image) {
+            width: 50%;
         }
     }
 </style>

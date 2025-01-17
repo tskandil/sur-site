@@ -1,5 +1,5 @@
 @mixin primaryHeading($lh: 1) {
-    font-family: "Cardo";
+    font-family: "Cardo", serif;
     font-size: 3rem;
     font-weight: 700;
     line-height: $lh;
@@ -15,7 +15,7 @@
 }
 
 @mixin tertiaryHeading($lh: 1) {
-    font-family: "Cardo";
+    font-family: "Cardo", serif;
     font-size: 2rem;
     font-weight: 700;
     line-height: $lh;
@@ -31,7 +31,8 @@
 }
 
 @mixin largeBodyText($lh: 1.3) {
-    font-family: "josefin slab";
+    font-family: "Josefin Slab", serif;
+    font-optical-sizing: auto;
     font-size: 1.25rem;
     font-weight: 300;
     line-height: $lh;
@@ -45,7 +46,8 @@
 }
 
 @mixin bodyText($lh: 1.3) {
-    font-family: "josefin slab";
+    font-family: "Josefin Slab", serif;
+    font-optical-sizing: auto;
     font-size: 1rem;
     font-weight: 200;
     line-height: $lh;
@@ -62,7 +64,8 @@
 }
 
 @mixin label {
-    font-family: "josefin slab";
+    font-family: "Josefin Slab", serif;
+    font-optical-sizing: auto;
     font-size: .75rem;
     font-weight: 300;
     text-transform: uppercase;

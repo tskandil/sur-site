@@ -1,7 +1,15 @@
 ---
 // @ts-nocheck
 import { PortableText } from 'astro-portabletext'
+import RichTextImage from './RichTextImage.astro';
+
 const { node } = Astro.props;
+
+const components = {
+  type: {
+    image: RichTextImage,
+  }
+};
 ---
 
-<PortableText value={node} />
+<PortableText value={node} components={components} />

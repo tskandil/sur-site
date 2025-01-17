@@ -27,26 +27,114 @@ const artwork = Astro.props;
 ---
 
 <Main title=`Sur - ${artwork.title}`>
-	<!-- title image artists description media year button -->
-	 <h1>{artwork.title}</h1>
-	 <p>{artwork.year}</p>
-	 <SanityImage node={artwork.image}/>
-	 <p>{artwork.medium && artwork.medium.length !== 0 && artwork.medium.map((singleMedium) => capitaliseFirstLetter(singleMedium)).join(", ")}</p>
-	 <p>{artwork.description}</p>
-	 {artwork.artists && artwork.artists.length !== 0 && artwork.artists.map((artist) => {
-		 // logic
-		return (
-			<div>
-				<p>{artist.name}</p>
-				<p>{artist.country}</p>
-				<p>{artist.shortBio}</p>
-			</div>
-		);
-	})}
-	<a href={`mailto:info@sur.art?subject=Inquiry for ${artwork.title}&body=I would like to inquire about the artwork at https://sur.art/artworks/${artwork.slug.current}`}>Inquire</a>
+	<div class="titleBox">
+		<h1 class="artworkTitle">{artwork.title}</h1>
+		<p class="artworkYear">{artwork.year}</p>
+		<div class="inquireBox">
+			<a href={`mailto:info@sur.art?subject=Inquiry for ${artwork.title}&body=I would like to inquire about the artwork at https://sur.art/artworks/${artwork.slug.current}`}>Inquire</a>
+		</div>
+	</div>
+	<div class="artworkBox">
+		<div class="artworkImage">
+			<SanityImage node={artwork.image}/>
+		</div>
+		<div class="artworkInfo">
+			<p class="artworkMedium">{artwork.medium && artwork.medium.length !== 0 && artwork.medium.map((singleMedium) => capitaliseFirstLetter(singleMedium)).join(", ")}</p>
+			<p class="artworkCaption">{artwork.description}</p>
+			{artwork.artists && artwork.artists.length !== 0 && artwork.artists.map((artist) => {
+				return (
+					<div>
+						<p class="artistName">{artist.name}</p>
+						<p class="artistCountry">{artist.country}</p>
+						<p class="artistBio">{artist.shortBio}</p>
+					</div>
+				);
+			})}
+		</div>
+	</div>
 </Main>
 
 <style lang="scss">
 	@use "../../styles/mixins.scss";
+	.titleBox {
+		@include mixins.fullWidth;
+        @media (max-width: 512px) {
+		    text-align: center;
+        }
+	}
 
+	.artworkTitle {
+		@include mixins.primaryHeading;
+		margin-bottom: var(--gap-small);
+	}
+
+	.artworkYear {
+		@include mixins.label;
+		margin-bottom: var(--gap-large);
+
+	}
+
+	.inquireBox {
+		display: flex;
+		align-items: center;
+		justify-items: center;
+		// height: 30px;
+		width: 150px;
+		background: var(--white);
+		border: 1px solid var(--black);
+		@include mixins.label;
+		padding-block: 15px;
+		padding-inline: var(--gap-small);
+
+	}
+
+	.artworkBox {
+		& {
+			display: flex;
+			gap: var(--gap-small);
+		}
+		.artworkImage {
+			flex: 1;
+		}
+		.artworkInfo {
+			flex: 1;
+		}
+		@media (max-width: 768px) {
+			& {
+				flex-direction: column;
+			}
+		}
+		margin-bottom: var(--gap-large);
+
+	}
+
+	.artworkMedium {
+		@include mixins.label;
+		margin-bottom: var(--gap-small);
+	}
+
+	.artworkCaption {
+		@include mixins.bodyText;
+		font-style: italic;
+		margin-bottom: var(--gap-large);
+
+	}
+
+	.artistName {
+		@include mixins.tertiaryHeading;
+		margin-bottom: var(--gap-small);
+
+	}
+
+	.artistCountry {
+		@include mixins.label;
+		margin-bottom: var(--gap-small);
+
+	}
+
+	.artistBio {
+		@include mixins.bodyText;
+		margin-bottom: var(--gap-small);
+
+	}
 </style>

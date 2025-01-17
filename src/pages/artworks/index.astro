@@ -17,33 +17,57 @@ const artworks = await sanityClient.fetch(`*[_type == "artwork" && defined(slug.
 ---
 
 <Main title="Sur - Artworks">
-  <!-- title
-   grid of the artwork
- -->
- <div class="titleBox">
-    <h1 class="title">Artworks</h1>
-<div class="artworksGrid breakout">
-
-    {artworks && artworks.length !== 0 && artworks.map((artwork) => {
-        // any logic here
-        return (
-            <div>
-                <a href={`/artworks/${artwork.slug.current}`}>
-                    <SanityImage node={artwork.image}/>
-                    <h1>{artwork.title}</h1>
-                    <p>{artwork.artists && artwork.artists.length !== 0 && artwork.artists.map((artist) => artist.name).join(", ")}</p>
-                </a>
-            </div>
-        );   
-    })}
-</div>
-
-</div>
+    <div class="titleBox">
+        <h1 class="title">Artworks</h1>
+    </div>
+    <div class="artworksGrid breakout">
+        {artworks && artworks.length !== 0 && artworks.map((artwork) => {
+            // any logic here
+            return (
+                <div class="artworkItem">
+                    <a href={`/artworks/${artwork.slug.current}`}>
+                        <SanityImage node={artwork.image}/>
+                        <h1>{artwork.title}</h1>
+                        <p>{artwork.artists && artwork.artists.length !== 0 && artwork.artists.map((artist) => artist.name).join(", ")}</p>
+                    </a>
+                </div>
+            );   
+        })}
+    </div>
 </Main>
 
 <style lang="scss">
     @use "../../styles/mixins.scss";
-
-
- 
+    .titleBox {
+		@include mixins.fullWidth;
+        @media (max-width: 512px) {
+		    text-align: center;
+        }
+	}
+	.title {
+		@include mixins.primaryHeading;
+	}
+    .artworksGrid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--gap-medium);
+        margin-bottom: var(--gap-large);
+    }
+    .artworkItem {
+        @include mixins.link($isHoverable: true);
+        flex: 0 0 calc((100% - ((var(--columns) - 1) * var(--gap-medium))) / var(--columns));
+    }
+    .artworkItem a {
+        display:flex;
+        align-items: center;
+        height:100%;
+        flex-direction: column;
+        gap: var(--gap-small);
+    }
+    .artworkItem h1 {
+        @include mixins.tertiaryHeading;
+    }
+    .artworkItem p {
+        @include mixins.label;
+    }
 </style>
